@@ -1,0 +1,160 @@
+#!/bin/bash -e
+
+# Automatic updates/commits of svn working copy
+#
+# By David Schoen <dave@lyte.id.au>
+
+function usage {
+
+	echo Automatic updates/commits of svn working copy
+	echo
+	echo "Usage: $0 [options] <svn working copy>"
+	echo
+	echo "Options:"
+	echo "-m|--max-lag=<seconds> How long to wait before forcing a refresh"
+	echo "--debug"
+	echo "--verbose"
+
+	exit 1
+	
+} # end usage()
+
+function message {
+	if [[ $verbose -ne 0 ]]; then
+		echo "DEBUG: $@"
+	fi
+} # end message()
+
+function error {
+	echo "ERROR: $@"
+	exit 1
+} # end error()
+
+# generates a unique id for this working copy
+function get_id {
+	echo "$PWD" | md5sum | cut -d' ' -f1
+} # end get_id()
+
+# stores now as the time that this working copy was last updated
+function set_updated {
+	mkdir -p "$metadata_path"
+	id=$(get_id)
+	# we'll use the timestamp on the file and echo the name in there so humans can figure it out too
+	echo "$PWD" > "$metadata_path/$id"
+} # end set_updated()
+
+function svn_should_update {
+	id=$(get_id)
+	meta_file="$metadata_path/$id"
+	if [[ -f "$meta_file" ]]; then
+		mtime=$(stat -c%Y "$meta_file")
+		now=$(date +%s)
+		lapsed=$(($now - $mtime))
+		[[ $lapsed -ge $max_lag ]] && return 0 || return 1
+	fi
+} # end svn_should_update()
+
+# check output from "svn st" and add/rm or ignore files as appropriate
+function svn_should_commit {
+	tmp="$(mktemp)"
+
+	message Checking current status
+	svn st --ignore-externals > "$tmp"
+	status=$?
+	[[ $status -eq 0 ]] || error svn st exit status was $status
+
+	wtf_status=0
+	should_commit=0
+	while read line; do
+		status="${line:0:1}"
+		flag="${line:1:1}"
+		file="${line:8}"
+
+		case "$status" in
+			A|D|M) ;; # just ignore modifications that have already worked
+			X) ;; # don't need to do anything with svn externals
+			"?") svn add $svn_quiet_arg "$file"@;;
+			"!") svn rm $svn_quiet_arg "$file"@;;
+		    "C")
+				error Conflict detected, cowardly refusing to do anything
+			;;
+			*) wtf_status=1 ;;
+		esac
+		should_commit=1
+	done < "$tmp"
+
+	[[ $wtf_status -eq 0 ]] || error Unexpected status of "'$status'", this might be a bug
+
+	rm "$tmp"
+
+	# reverse so exit status makes sense
+	[[ $should_commit -eq 0 ]] && return 1 || return 0
+} # svn_should_commit()
+
+function svn_update {
+	message Updating
+	svn up --non-interactive $svn_quiet_arg
+	status=$?
+	[[ $status -eq 0 ]] || error svn up exit status was $status
+	set_updated
+}
+
+function svn_commit {
+	# always update before committing...
+	svn_update
+	message Committing
+	svn ci $svn_quiet_arg -m "Auto commit"
+	status=$?
+	[[ $status -eq 0 ]] || error Failed to commit with status $status
+}
+
+# set defaults
+verbose=0
+metadata_path="$HOME/.lyte/svn_auto_commit"
+max_lag=3600 # 1 hour
+
+# parse cli options
+while true; do
+	# quit if we're out of options (let the argument parsing commence)
+	[[ -z "$1" ]] && break
+
+	case "$1" in
+		--verbose|-v)
+			verbose=1
+			;;
+		--max-lag=*|-m=*)
+			max_lag="${1#*=}"
+			;;
+		--debug)
+			set -x
+			;;
+		--help)
+			usage
+			;;
+		*)
+			dir="$1"
+			;;
+	esac
+
+	# get next arg
+	shift
+done
+
+if [[ -z "$dir" || ! -d "$dir" ]]; then
+	usage
+fi
+
+cd "$dir"
+
+svn_quiet_arg='-q'
+if [[ $verbose -ne 0 ]]; then
+	svn_quiet_arg=''
+fi
+
+if svn_should_commit; then
+	svn_commit
+elif svn_should_update; then
+	svn_update
+fi
+
+message Done
