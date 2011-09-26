@@ -1,0 +1,26 @@
+To convert for iPod run with:
+	./lac --cleandest --recursive --preserve --link mp4,mp3 --to mp4 --outdir $PWD/test/cache/ipod $PWD/test/source
+
+Airr tunes test:
+	./lac --encoder=lame --defopts=0 --eopts="-V0 --vbr-new" --cleandest --recursive --preserve --link mp3 --to mp3 --outdir test/cache/airtunes test/source
+
+
+Packages for ubuntu:
+	taggers:
+		libogg-vorbis-header-perl
+		libmp3-tag-perl
+		libaudio-flac-header-perl
+		libmp4-info-perl
+		libaudio-wma-perl
+		libaudio-musepack-perl
+	
+	misc:
+		libcddb-get-perl
+	
+	encoders/decoders:
+		lame
+		flac
+		faac
+		faad
+		ffmpeg
+		musepack-tools

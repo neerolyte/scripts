@@ -1,0 +1,9 @@
+My perpetually unfinished fork of pacpl.
+
+I wanted to add some features to pacpl including:
+ * resumeable conversions
+ * repeatable conversions
+ * support more codecs
+ * recover from "power off" type failures
+
+I managed to add all the features I needed and then ran out of steam to fix the doco and resubmit a patch back to the original author, I've published this "as is" so that it can be reused if someone feels so inclined.

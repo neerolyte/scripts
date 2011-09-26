@@ -1,0 +1,17 @@
+run with taint mode, get rid of all taints!
+
+investigate beatles mp3 tagging failures
+
+bug - outputting totals way too often
+
+fix up encoders/decoders to flag if they support stdout/in and fucking use it
+
+some way to configure "skip" lists
+
+alter encoders/decoders to be fully preferential rather than having a default and then fall back to random others
+
+ensure ubuntu package info specifies mpc package
+
+multithreaded
+
+quote symbols break tagger, they're temporarily removed
