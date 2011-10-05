@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+last_uptime=-1
+resets=0
+
+function get_uptime_in_seconds {
+	IFS=: read -r hour minute second <<< "$1"
+	echo $((((10#$hour*60)+10#$minute)*60+10#$second))
+}
+
+export IFS=,
+while read -r date status rated rateu uptime snrd snru attend attenu powerd poweru; do 
+	if [[ "$status" == "up" ]]; then
+		if [[ $(get_uptime_in_seconds "$last_uptime") > $(get_uptime_in_seconds "$uptime") ]]; then
+			printf "%s: %9s %5d / %4d\n" "$date" "${last_uptime}" "$rated" "$rateu"
+			resets=$(($resets+1))
+		fi
+		last_uptime="$uptime"
+	fi
+done < "$1"
+
+echo "Total resets: $resets"
+

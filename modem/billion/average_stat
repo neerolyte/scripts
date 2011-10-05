@@ -1,0 +1,21 @@
+#!/bin/bash -e
+
+
+uptot=0
+downtot=0
+count=0
+
+export IFS=,
+while read -r date status rated rateu uptime snrd snru attend attenu powerd poweru; do 
+	if [[ "$status" == "up" ]]; then
+		let downtot=$downtot+$rated
+		let uptot=$uptot+$rateu
+		let count=$count+1
+	fi
+done < "$1"
+
+echo "Up total: $uptot"
+echo "Down total: $downtot"
+echo "Count: $count"
+echo "Up avg: $((uptot/$count))"
+echo "Down avg: $((downtot/$count))"

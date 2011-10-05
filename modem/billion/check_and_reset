@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+cd "$(dirname $0)"
+
+tmp="$(mktemp)"
+
+function get_uptime_in_seconds {
+	IFS=: read -r hour minute second <<< "$1"
+	echo $((((10#$hour*60)+10#$minute)*60+10#$second))
+}
+
+./get_raw_stats > "$tmp"
+
+attend="$(grep '^attenuation downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+attenu="$(grep '^attenuation upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+snrd="$(grep '^noise margin downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+snru="$(grep '^noise margin upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+powerd="$(grep '^output power downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+poweru="$(grep '^output power upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+rated="$(grep '^near-end interleaved channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+rateu="$(grep '^far-end interleaved channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+
+status="$(grep '^current modem status: ' "$tmp" | sed -r 's/.*: (.*)\r/\1/g')"
+uptime="$(grep '^ADSL uptime' "$tmp" | sed -r 's/^ADSL uptime *(.*)\r/\1/g')"
+
+rm -f "$tmp"
+
+# if currently connected and reasonably stable
+if
+	[[ "$status" == "up" ]] && 
+	(( $(get_uptime_in_seconds "$uptime") > 3600 ))
+then
+	# if rate too low
+	if (( 10#"$rated" < 5000 )) || (( 10#"$rateu" < 256 )); then
+		./reset_adsl
+	fi
+fi

@@ -1,0 +1,36 @@
+#!/usr/bin/expect 
+
+# timeout script after 20 seconds
+set timeout 20 
+
+# First arg is host name
+set hostname router
+
+# Second arg is user id
+set userid admin
+
+# Third arg is password
+set password %PASSWORD%
+#set password [lindex $argv 2] 
+
+# start the telnet client
+spawn telnet $hostname 
+
+# Wait til you see "login:"
+expect "Login name: "
+send "$userid\r\n" 
+
+# Wait for "Password:"
+expect "Password: " 
+send "$password\r\n"
+
+# Wait for shell prompt. This is shell specific
+expect "> "
+send "reboot\r\n"
+
+expect "> "
+
+# hangup
+send "logout\r\n"
+expect eof
+

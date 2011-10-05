@@ -1,0 +1,35 @@
+#!/bin/bash -e
+
+cd "$(dirname $0)"
+
+filedate="$(date "+%Y%m%d")"
+file="stats/$filedate.csv"
+
+mkdir -p stats
+
+tmp="$(mktemp)"
+
+./get_raw_stats > "$tmp"
+
+attend="$(grep '^attenuation downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+attenu="$(grep '^attenuation upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+snrd="$(grep '^noise margin downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+snru="$(grep '^noise margin upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+powerd="$(grep '^output power downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+poweru="$(grep '^output power upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+rated="$(grep '^near-end interleaved channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+rateu="$(grep '^far-end interleaved channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+
+status="$(grep '^current modem status: ' "$tmp" | sed -r 's/.*: (.*)\r/\1/g')"
+uptime="$(grep '^ADSL uptime' "$tmp" | sed -r 's/^ADSL uptime *(.*)\r/\1/g')"
+# date in openoffice/excel compatible format
+date="$(date "+%Y-%m-%d %H:%M:%S")"
+
+# write header if file is new
+if [[ ! -e "$file" ]]; then
+	echo "date,status,rated,rateu,uptime,snrd,snru,attend,attenu,powerd,poweru" > "$file"
+fi
+
+echo "$date,$status,$rated,$rateu,$uptime,$snrd,$snru,$attend,$attenu,$powerd,$poweru" >> "$file"
+
+rm -f "$tmp"

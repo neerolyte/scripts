@@ -1,0 +1,6 @@
+#!/bin/bash
+cd $(dirname $0)
+
+./speed_check.php && ./reboot_modem
+
+exit 0
