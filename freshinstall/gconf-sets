@@ -55,6 +55,12 @@ gconftool -s /desktop/gnome/interface/icon_theme -t string 'gnome'
 gconftool -s /desktop/gnome/interface/gtk_theme -t string 'Clearlooks'
 gconftool -s /apps/metacity/general/theme -t string 'Clearlooks'
 
+################
+### gnome-do ###
+################
+gconftool -s /apps/gnome-do/preferences/Do/CorePreferences/AlwaysShowResults -t bool true
+gconftool -s /apps/gnome-do/preferences/Do/CorePreferences/Theme -t string 'Mini'
+
 #######################
 ### App association ###
 #######################
