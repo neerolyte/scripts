@@ -1,0 +1,64 @@
+#!/bin/bash
+
+#####################
+### Shortcut Keys ###
+#####################
+
+# media keys that are always handy and consistent across all my pcs
+gconftool --set /apps/gnome_settings_daemon/keybindings/play --type string '<Mod4>c'
+gconftool --set /apps/gnome_settings_daemon/keybindings/stop --type string '<Mod4>x'
+gconftool --set /apps/gnome_settings_daemon/keybindings/next --type string '<Mod4>v'
+gconftool --set /apps/gnome_settings_daemon/keybindings/previous --type string '<Mod4>z'
+gconftool --set /apps/gnome_settings_daemon/keybindings/volume_up --type string '<Mod4>q'
+gconftool --set /apps/gnome_settings_daemon/keybindings/volume_down --type string '<Mod4>a'
+
+# stop desktop switching with mouse wheel
+#gconftool --set /apps/compiz/plugins/vpswitch/allscreens/options/next_button --type string 'Disabled'
+#gconftool --set /apps/compiz/plugins/vpswitch/allscreens/options/prev_button --type string 'Disabled'
+
+# zoomy crap
+gconftool --set /apps/compiz/plugins/vpswitch/allscreens/options/zoom_box_button --type string 'Disabled'
+gconftool --set /apps/compiz/plugins/vpswitch/allscreens/options/zoom_in_button --type string 'Disabled'
+gconftool --set /apps/compiz/plugins/vpswitch/allscreens/options/zoom_out_button --type string 'Disabled'
+
+# lock desktop via windows key combo
+gconftool --set /apps/gnome_settings_daemon/keybindings/screensaver --type string '<Mod4>l'
+
+# gnome-terminal
+gconftool --set /apps/gnome-terminal/global/use_menu_accelerators --type bool false
+gconftool --set /apps/gnome-terminal/keybindings/move_tab_left --type string 'Disabled'
+gconftool --set /apps/gnome-terminal/keybindings/move_tab_right --type string 'Disabled'
+gconftool --set /apps/gnome-terminal/keybindings/next_tab --type string '<Shift><Control>Page_Down'
+gconftool --set /apps/gnome-terminal/keybindings/prev_tab --type string '<Shift><Control>Page_Up'
+gconftool --set /apps/gnome-terminal/global/use_mnemonics --type bool false
+gconftool --set /apps/gnome-terminal/profiles/Default/background_color --type string '#000000000000'
+gconftool --set /apps/gnome-terminal/profiles/Default/foreground_color --type string '#FFFFFFFFFFFF'
+gconftool --set /apps/gnome-terminal/profiles/Default/use_theme_colors --type bool false
+
+#######################
+### Standard Config ###
+#######################
+
+# don't let gnome keyring manage ssh
+gconftool --set /apps/gnome-keyring/daemon-components/ssh --type boolean false
+
+# I hate sound themes
+gconftool --set /desktop/gnome/sound/event_sounds --type boolean false
+
+###################
+### gnome theme ###
+###################
+gconftool --set /apps/metacity/general/theme --type string 'Clearlooks'
+gconftool -s /apps/metacity/general/button_layout -t string menu:minimize,maximize,close
+gconftool -s /desktop/gnome/peripherals/mouse/cursor_theme -t string 'default'
+gconftool -s /desktop/gnome/interface/icon_theme -t string 'gnome'
+gconftool -s /desktop/gnome/interface/gtk_theme -t string 'Clearlooks'
+gconftool -s /apps/metacity/general/theme -t string 'Clearlooks'
+
+#######################
+### App association ###
+#######################
+# always use deluge for torrents
+gconftool-2 -t string -s /desktop/gnome/url-handlers/magnet/command 'deluge "%s"'
+gconftool-2 -t bool -s /desktop/gnome/url-handlers/magnet/needs_terminal false
+gconftool-2 -t bool -s /desktop/gnome/url-handlers/magnet/enabled true
