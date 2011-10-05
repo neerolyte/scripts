@@ -3,8 +3,8 @@
 # timeout script after 20 seconds
 set timeout 20 
 
-set hostname modem
-set password %PASSWORD%
+set hostname [lindex $argv 0]
+set password [lindex $argv 1] 
 
 # start the telnet client
 spawn telnet $hostname 

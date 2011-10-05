@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. "${0%/*}/config"
+
+# work around because i can't figure out how to handles passwords sanely in expect
+"$@" "$hostname" "$password"
