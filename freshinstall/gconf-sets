@@ -61,6 +61,13 @@ gconftool -s /apps/metacity/general/theme -t string 'Clearlooks'
 gconftool -s /apps/gnome-do/preferences/Do/CorePreferences/AlwaysShowResults -t bool true
 gconftool -s /apps/gnome-do/preferences/Do/CorePreferences/Theme -t string 'Mini'
 
+##############
+### compiz ###
+#############
+
+# don't let scale make windows too small
+gconftool -s /apps/compiz-1/plugins/scale/screen0/options/spacing -t int 0
+
 #######################
 ### App association ###
 #######################
