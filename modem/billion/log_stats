@@ -9,7 +9,7 @@ mkdir -p stats
 
 tmp="$(mktemp)"
 
-./call_expect ./get_raw_stats > "$tmp"
+./get_raw_stats > "$tmp"
 
 attend="$(grep '^attenuation downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
 attenu="$(grep '^attenuation upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"

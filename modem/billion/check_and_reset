@@ -9,7 +9,7 @@ function get_uptime_in_seconds {
 	echo $((((10#$hour*60)+10#$minute)*60+10#$second))
 }
 
-./call_expect ./get_raw_stats > "$tmp"
+./get_raw_stats > "$tmp"
 
 attend="$(grep '^attenuation downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
 attenu="$(grep '^attenuation upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
@@ -28,10 +28,10 @@ rm -f "$tmp"
 # if currently connected and reasonably stable
 if
 	[[ "$status" == "up" ]] && 
-	(( $(get_uptime_in_seconds "$uptime") > 3600 ))
+	(( $(get_uptime_in_seconds "$uptime") > 1800 ))
 then
 	# if rate too low
-	if (( 10#"$rated" < 5000 )) || (( 10#"$rateu" < 256 )); then
-		./call_expect ./reset_adsl
+	if (( 10#"$rated" < 4000 )) || (( 10#"$rateu" < 256 )); then
+		./reset_adsl
 	fi
 fi

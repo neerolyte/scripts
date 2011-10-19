@@ -1,0 +1,21 @@
+#!/usr/bin/expect 
+
+# timeout script after 20 seconds
+set timeout 20 
+
+set hostname [lindex $argv 0]
+set password [lindex $argv 1] 
+
+# start the telnet client
+spawn telnet $hostname 
+
+# Wait for "Password:"
+expect "Password: " 
+send "$password\n"
+
+expect "> "
+send "wan adsl reset\n"
+
+# Exit modem interface
+expect "> "
+send "exit\n"
