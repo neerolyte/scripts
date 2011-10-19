@@ -67,6 +67,10 @@ gconftool -s /apps/gnome-do/preferences/Do/CorePreferences/Theme -t string 'Mini
 
 # don't let scale make windows too small
 gconftool -s /apps/compiz-1/plugins/scale/screen0/options/spacing -t int 0
+# don't scale windows on all virtual desktops, just the current one
+gconftool -s /apps/compiz-1/plugins/scale/screen0/options/initiate_key -t string '<Super>w'
+gconftool -s /apps/compiz-1/plugins/scale/screen0/options/initiate_all_key -t string 'Disabled'
+
 # make dual head work sanely
 gconftool -s /apps/compiz-1/plugins/scale/screen0/options/multioutput_mode -t int 1
 
