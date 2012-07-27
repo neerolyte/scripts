@@ -1,0 +1,47 @@
+#!/bin/bash -e
+
+cd "$(dirname $0)"
+
+tmp="$(mktemp)"
+
+cleanup() {
+	rm -f -- "$tmp"
+}
+
+tries=3
+# modem sometimes kills the socket so i just try a couple of times when that happens
+while ! ./get_raw_stats > "$tmp" 2> /dev/null; do
+	# echo "Trying again..."
+	tries=$(($tries-1))
+	if [[ $tries -le 0 ]]; then
+		echo "ERROR: Failed to get modem stats" 1>&2
+		cleanup
+		exit 1
+	fi
+done
+
+attend="$(grep '^attenuation downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+attenu="$(grep '^attenuation upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+snrd="$(grep '^noise margin downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+snru="$(grep '^noise margin upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+powerd="$(grep '^output power downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+poweru="$(grep '^output power upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
+rateid="$(grep '^near-end interleaved channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+rateiu="$(grep '^far-end interleaved channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+ratefd="$(grep '^near-end fast channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+ratefu="$(grep '^far-end fast channel bit rate: ' "$tmp" | sed -r 's/.*: (.*) kbps.*/\1/g')"
+
+status="$(grep '^current modem status: ' "$tmp" | sed -r 's/.*: (.*)\r/\1/g')"
+uptime="$(grep '^ADSL uptime' "$tmp" | sed -r 's/^ADSL uptime *(.*)\r/\1/g')"
+# uptime in seconds
+uptimes="$(echo "$uptime" | awk -F : '{print (($1*24)+$2)*60+$3}')"
+
+cleanup
+
+echo status:$status \
+	rateid:$rateid rateiu:$rateiu \
+	ratefd:$ratefd ratefu:$ratefu \
+	uptime:$uptimes \
+	snrd:$snrd snru:$snru \
+	attend:$attend attenu:$attenu \
+	powerd:$powerd poweru:$poweru
