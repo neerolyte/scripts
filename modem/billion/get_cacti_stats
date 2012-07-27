@@ -8,17 +8,10 @@ cleanup() {
 	rm -f -- "$tmp"
 }
 
-tries=3
-# modem sometimes kills the socket so i just try a couple of times when that happens
-while ! ./get_raw_stats > "$tmp" 2> /dev/null; do
-	# echo "Trying again..."
-	tries=$(($tries-1))
-	if [[ $tries -le 0 ]]; then
-		echo "ERROR: Failed to get modem stats" 1>&2
-		cleanup
-		exit 1
-	fi
-done
+if ! ./get_raw_stats > "$tmp"; then
+	cleanup
+	exit 1
+fi
 
 attend="$(grep '^attenuation downstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"
 attenu="$(grep '^attenuation upstream: ' "$tmp" | sed -r 's/.*: (.*) db.*/\1/g')"

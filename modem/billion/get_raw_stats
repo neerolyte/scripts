@@ -1,3 +1,12 @@
 #!/bin/bash
 
-"${0%/*}/call_expect" "${0%/*}/get_raw_stats.expect"
+# modem sometimes kills the socket so i just try a couple of times when that happens
+tries=5
+while ! "${0%/*}/call_expect" "${0%/*}/get_raw_stats.expect" 2> /dev/null; do
+	sleep 5
+	tries=$(($tries-1))
+	if [[ $tries -le 0 ]]; then
+		echo "ERROR: Failed to get modem stats" 1>&2
+		exit 1
+	fi
+done
